@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Server</title>
+</head>
+<body>
+  <h1>Buat Server</h1>
+  <form id="create-server-form">
+    <label for="username">Nama Pengguna:</label><br>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="password">Kata Sandi:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+    
+    <button type="submit">Buat Server</button>
+  </form>
+
+  <script>
+    // Konfigurasi
+    const API_KEY = 'ptla_mfBUNkE0wzlZsg09TCUUhVFWDH79pfnxxdyagekakV2';
+    const DOMAIN = 'https://new.darell.my.id'; // Ganti dengan URL panel Pterodactyl kamu
+    const EGG_ID = '15'; // Ganti dengan ID Egg
+    const NODE_ID = '1'; // Ganti dengan Node ID
+    const RAM = 1024; // RAM dalam MB
+    const CPU = 100; // CPU dalam %
+    const DISK = 1024; // Disk dalam MB
+
+    document.getElementById('create-server-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const email = username + "@example.com"; // Email otomatis (bisa disesuaikan)
+
+      try {
+        // Buat user baru
+        const userResponse = await fetch(`${DOMAIN}/api/application/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            email: email,
+            username: username,
+            first_name: username,
+            last_name: 'User',
+            password: password,
+            language: 'en'
+          })
+        });
+
+        const userData = await userResponse.json();
+        if (userData.errors) {
+          alert('Gagal membuat pengguna: ' + JSON.stringify(userData.errors));
+          return;
+        }
+
+        const userId = userData.attributes.id; // ID user baru
+        console.log('User ID:', userId);
+
+        // Buat server baru
+        const serverResponse = await fetch(`${DOMAIN}/api/application/servers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            name: `${username}-server`,
+            user: userId,
+            egg: EGG_ID,
+            docker_image: 'ghcr.io/pterodactyl/yolks:java_17',
+            startup: 'java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar server.jar',
+            limits: {
+              memory: RAM,
+              swap: 0,
+              disk: DISK,
+              io: 500,
+              cpu: CPU
+            },
+            feature_limits: {
+              databases: 1,
+              backups: 1
+            },
+            environment: {
+              SERVER_JARFILE: 'server.jar',
+              BUILD_NUMBER: 'latest'
+            },
+            deploy: {
+              locations: [NODE_ID],
+              dedicated_ip: false,
+              port_range: []
+            },
+            start_on_completion: true
+          })
+        });
+
+        const serverData = await serverResponse.json();
+        if (serverData.errors) {
+          alert('Gagal membuat server: ' + JSON.stringify(serverData.errors));
+          return;
+        }
+
+        alert('Server berhasil dibuat!');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat membuat server.');
+      }
+    });
+  </script>
+</body>
+</html>
